@@ -111,6 +111,11 @@ body {
   }
 
   .notes__sidebar {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .notes__sidebar {
     border-right: none;
     border-bottom: 2px solid #e0e0e0;
   }
