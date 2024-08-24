@@ -5,14 +5,28 @@ import "./note-preview.js";
 class NoteList extends HTMLElement {
   constructor() {
     super();
-    this.notes = Notes.getAll();
+    this.notes = [];
   }
 
-  connectedCallback() {
+  async connectedCallback() {
+    this.notes = await getAllNotes();
+    this.render();
+
+    document.addEventListener("noteDeleted", async (event) => {
+      console.log("Note deleted event received with ID:", event.detail.id);
+      await this.updateNotes();
+    });
+  }
+
+  async updateNotes() {
+    console.log("Updating notes...");
+    this.notes = await getAllNotes();
+    console.log("Notes updated:", this.notes);
     this.render();
   }
 
   render() {
+    console.log("Rendering notes list...");
     this.innerHTML = `
       <div class="notes__sidebar">
         <button class="notes__add">Add note</button>

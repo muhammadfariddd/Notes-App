@@ -5,7 +5,7 @@ class LoadingIndicator extends HTMLElement {
     this.shadowRoot.innerHTML = `
             <style>
                 .loading {
-                    display: flex;
+                    display: none; /* Awalnya disembunyikan */
                     justify-content: center;
                     align-items: center;
                     position: fixed;
@@ -32,14 +32,15 @@ class LoadingIndicator extends HTMLElement {
                 <div class="spinner"></div>
             </div>
         `;
+    this.loadingElement = this.shadowRoot.querySelector(".loading");
   }
 
   show() {
-    this.style.display = "flex";
+    this.loadingElement.style.display = "flex";
   }
 
   hide() {
-    this.style.display = "none";
+    this.loadingElement.style.display = "none";
   }
 }
 

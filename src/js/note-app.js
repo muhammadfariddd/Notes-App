@@ -40,13 +40,8 @@ class NoteApp extends HTMLElement {
         this.loadingIndicator.show();
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        await addNote({
-          title: event.detail.title,
-          body: event.detail.body,
-        });
         const updatedNotes = await getAllNotes();
 
-        // Hide loading indicator after adding note
         this.loadingIndicator.hide();
 
         noteList.notes = updatedNotes;
@@ -54,6 +49,27 @@ class NoteApp extends HTMLElement {
 
         notePreview.setNoteTitle(event.detail.title);
         notePreview.setNoteBody(event.detail.body);
+      });
+
+      document.addEventListener("noteDeleted", async (event) => {
+        console.log(`Note deleted with ID: ${event.detail.id}`);
+
+        this.loadingIndicator.show();
+        try {
+          const updatedNotes = await getAllNotes();
+          console.log("Notes list after deletion:", updatedNotes);
+          noteList.notes = updatedNotes;
+          noteList.render();
+
+          if (notePreview.getAttribute("note-id") === event.detail.id) {
+            notePreview.setNoteTitle("");
+            notePreview.setNoteBody("");
+          }
+        } catch (error) {
+          console.error("Failed to refresh notes:", error);
+        } finally {
+          this.loadingIndicator.hide();
+        }
       });
     } catch (error) {
       console.error("Failed to fetch or add notes:", error);

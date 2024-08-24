@@ -32,6 +32,7 @@ async function deleteNote(id) {
     throw new Error("Gagal menghapus catatan");
   }
   const data = await response.json();
+  console.log(data);
   return data.message;
 }
 
