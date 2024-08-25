@@ -1,79 +1,127 @@
-import { getAllNotes, addNote, deleteNote } from "./api.js";
-import "./note-list.js";
-import "./note-preview.js";
-import "./loading-indicator.js";
+import { getAllNotes, addNote, deleteNote } from './api.js'
+import './note-list.js'
+import './note-preview.js'
+import './loading-indicator.js'
+import Swal from 'sweetalert2'
+import gsap from 'gsap'
 
 class NoteApp extends HTMLElement {
   constructor() {
-    super();
-    this.loadingIndicator = document.createElement("loading-indicator");
-    document.body.appendChild(this.loadingIndicator);
+    super()
+    this.loadingIndicator = document.createElement('loading-indicator')
+    document.body.appendChild(this.loadingIndicator)
   }
 
   async connectedCallback() {
-    this.render();
+    this.render()
 
-    const noteList = this.querySelector("note-list");
-    const notePreview = this.querySelector("note-preview");
+    const noteList = this.querySelector('note-list')
+    const notePreview = this.querySelector('note-preview')
 
-    this.loadingIndicator.show();
+    this.loadingIndicator.show()
 
     try {
-      const notes = await getAllNotes();
+      const notes = await getAllNotes()
 
-      this.loadingIndicator.hide();
+      this.loadingIndicator.hide()
 
-      noteList.notes = notes;
-      noteList.render();
+      noteList.notes = notes
+      noteList.render()
+
+      gsap.from(noteList.querySelectorAll('.notes__list-item'), {
+        opacity: 0,
+        y: 50,
+        duration: 0.5,
+        stagger: 0.1,
+      })
 
       if (notes.length > 0) {
-        notePreview.setNoteTitle(notes[0].title);
-        notePreview.setNoteBody(notes[0].body);
+        notePreview.setNoteTitle(notes[0].title)
+        notePreview.setNoteBody(notes[0].body)
       }
 
-      noteList.addEventListener("noteSelected", (event) => {
-        notePreview.setNoteTitle(event.detail.title);
-        notePreview.setNoteBody(event.detail.body);
-      });
+      noteList.addEventListener('noteSelected', (event) => {
+        notePreview.setNoteTitle(event.detail.title)
+        notePreview.setNoteBody(event.detail.body)
+      })
 
-      document.addEventListener("noteAdded", async (event) => {
-        this.loadingIndicator.show();
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      document.addEventListener('noteAdded', async (event) => {
+        this.loadingIndicator.show()
+        await new Promise((resolve) => setTimeout(resolve, 500))
 
-        const updatedNotes = await getAllNotes();
+        const updatedNotes = await getAllNotes()
 
-        this.loadingIndicator.hide();
+        this.loadingIndicator.hide()
 
-        noteList.notes = updatedNotes;
-        noteList.render();
+        noteList.notes = updatedNotes
+        noteList.render()
 
-        notePreview.setNoteTitle(event.detail.title);
-        notePreview.setNoteBody(event.detail.body);
-      });
+        gsap.from(noteList.querySelectorAll('.notes__list-item'), {
+          opacity: 0,
+          y: 50,
+          duration: 0.5,
+          stagger: 0.1,
+        })
 
-      document.addEventListener("noteDeleted", async (event) => {
-        console.log(`Note deleted with ID: ${event.detail.id}`);
+        notePreview.setNoteTitle(event.detail.title)
+        notePreview.setNoteBody(event.detail.body)
 
-        this.loadingIndicator.show();
-        try {
-          const updatedNotes = await getAllNotes();
-          console.log("Notes list after deletion:", updatedNotes);
-          noteList.notes = updatedNotes;
-          noteList.render();
+        Swal.fire({
+          title: 'Berhasil!',
+          text: 'Catatan berhasil ditambahkan.',
+          icon: 'success',
+          confirmButtonText: 'Oke',
+        })
+      })
 
-          if (notePreview.getAttribute("note-id") === event.detail.id) {
-            notePreview.setNoteTitle("");
-            notePreview.setNoteBody("");
-          }
-        } catch (error) {
-          console.error("Failed to refresh notes:", error);
-        } finally {
-          this.loadingIndicator.hide();
+      document.addEventListener('noteDeleted', async (event) => {
+        console.log(`Note deleted with ID: ${event.detail.id}`)
+
+        if (typeof Swal !== 'undefined') {
+          console.log('SweetAlert2 is ready to use.')
+        } else {
+          console.error('SweetAlert2 is not available.')
         }
-      });
+
+        this.loadingIndicator.show()
+
+        try {
+          const updatedNotes = await getAllNotes()
+          noteList.notes = updatedNotes
+          noteList.render()
+
+          if (notePreview.getAttribute('note-id') === event.detail.id) {
+            notePreview.setNoteTitle('')
+            notePreview.setNoteBody('')
+          }
+
+          Swal.fire({
+            title: 'Catatan Terhapus!',
+            text: 'Catatan berhasil dihapus.',
+            icon: 'success',
+            confirmButtonText: 'Oke',
+          })
+        } catch (error) {
+          console.error('Failed to refresh notes:', error)
+          Swal.fire({
+            title: 'Gagal!',
+            text: 'Gagal memperbarui daftar catatan setelah penghapusan.',
+            icon: 'error',
+            confirmButtonText: 'Oke',
+          })
+        } finally {
+          this.loadingIndicator.hide()
+        }
+      })
     } catch (error) {
-      console.error("Failed to fetch or add notes:", error);
-      this.loadingIndicator.hide();
+      console.error('Failed to fetch or add notes:', error)
+      this.loadingIndicator.hide()
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Gagal mengambil atau menambahkan catatan. Silakan coba lagi.',
+        icon: 'error',
+        confirmButtonText: 'Oke',
+      })
     }
   }
 
@@ -83,8 +131,8 @@ class NoteApp extends HTMLElement {
           <note-list></note-list>
           <note-preview></note-preview>
       </div>
-    `;
+    `
   }
 }
 
-customElements.define("note-app", NoteApp);
+customElements.define('note-app', NoteApp)

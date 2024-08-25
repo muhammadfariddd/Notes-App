@@ -182,7 +182,6 @@ button.delete-note {
 @media (max-width: 768px) {
   .notes {
     grid-template-columns: 1fr;
-    /* height: 0; */
     height: auto;
   }
 
